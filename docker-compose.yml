@@ -1,0 +1,109 @@
+services:
+  apigateway:
+    build:
+      context: ./APIGateway
+      dockerfile: Dockerfile
+    container_name: apigateway
+    env_file:
+      - ./APIGateway/.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - userservice
+      - productservice
+      - orderservice
+      - deliveryservice
+    restart: unless-stopped
+
+  userservice:
+    build:
+      context: ./UserService
+      dockerfile: Dockerfile
+    container_name: userservice
+    env_file:
+      - ./UserService/.env
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongodb-user
+    restart: unless-stopped
+
+  productservice:
+    build:
+      context: ./ProductService
+      dockerfile: Dockerfile
+    container_name: productservice
+    env_file:
+      - ./ProductService/.env
+    ports:
+      - "4001:4001"
+    depends_on:
+      - mongodb-product
+    restart: unless-stopped
+
+  orderservice:
+    build:
+      context: ./OrderService
+      dockerfile: Dockerfile
+    container_name: orderservice
+    env_file:
+      - ./OrderService/.env
+    ports:
+      - "4002:4002"
+    depends_on:
+      - mongodb-order
+      - productservice
+      - userservice
+    restart: unless-stopped
+
+  deliveryservice:
+    build:
+      context: ./DeliveryServices
+      dockerfile: Dockerfile
+    container_name: deliveryservice
+    env_file:
+      - ./DeliveryServices/.env
+    ports:
+      - "4003:4003"
+    depends_on:
+      - mongodb-delivery
+      - orderservice
+    restart: unless-stopped
+
+  mongodb-user:
+    image: mongo:7.0
+    container_name: mongodb-user
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-user-data:/data/db
+
+  mongodb-product:
+    image: mongo:7.0
+    container_name: mongodb-product
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb-product-data:/data/db
+
+  mongodb-order:
+    image: mongo:7.0
+    container_name: mongodb-order
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongodb-order-data:/data/db
+
+  mongodb-delivery:
+    image: mongo:7.0
+    container_name: mongodb-delivery
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongodb-delivery-data:/data/db
+
+volumes:
+  mongodb-user-data:
+  mongodb-product-data:
+  mongodb-order-data:
+  mongodb-delivery-data:
